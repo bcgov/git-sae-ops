@@ -7,7 +7,7 @@ jobs:
   include:
     - stage: deploy
       install:
-      - docker build -t ikethecoder/git-sae-ops .
+      - docker build -t bcgovimages/git-sae-ops .
       provider: script
       script: bash docker_push || travis_terminate 1
       on:
