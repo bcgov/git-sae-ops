@@ -1,15 +1,17 @@
 language: node_js
-
 services:
-  - docker
-
+- docker
 jobs:
   include:
-    - stage: deploy
-      install:
-      - docker build -t bcgovimages/git-sae-ops .
-      provider: script
-      script: bash docker_push || travis_terminate 1
-      on:
-        all_branches: true
-        condition: "$TRAVIS_BRANCH =~ ^master|develop$ || -n $TRAVIS_TAG"  
+  - stage: deploy
+    install:
+    - docker build -t bcgovimages/git-sae-ops .
+    provider: script
+    script: bash docker_push || travis_terminate 1
+    on:
+      all_branches: true
+      condition: "$TRAVIS_BRANCH =~ ^master|develop$ || -n $TRAVIS_TAG"
+env:
+  global:
+  - secure: Ck1XgatasFwkxqmYcWhTJjaNvIkMUa4v4ky0yzj9yOgvcV3uEGMA1bpaeTw2ma/3/A8Ki9IguDVX47a2Zl3kezOm2HbtI9Rl1Vix4+W0++79+FD2lGmYzxhc2FfsOQdVeinzY2TNnl6ceXrH24DbzbWmewog76WI/BbHsAjsocYxJj6eE0CI7lWxgRsTTTyOpPuJVHKvWVaj1AnoK1c1sy6t6AvKxPZv1ycJDDnWBdG5gI2D98kFF/bni7259dHcVNqH551GaaXKnNqa5FIcxwzrcEPVOZtfcg5Un4PJUntgL2pzKNZ7J/nnEx1ZPs1cacl4g7ZIL7CsBd83J61a7Qr2LDr1T1Y9gNdD5raynAZmUYlmQ/QSx1u01ie0Z70rGwKIwbEOE/zCRR4cEGQMs+3X8PJg5f8Fni7g3j6anyW6jJA3oUhGDBL7gyGoUghwfBp2SRNvZdqN1WrTNRnJ85X5Dtd3MoWnoEG6OQ9YDJJyj1PEn1hbXtpgKjlhDsg6pZwD9d7VvUDOvEzzhFMiY49E7pv1ca/C+PyBRMv/OZbWYj+0ggWDgA29K/Hiwxk122PSyVNOicIUxboAoH/4xEFx5lKpXaDxEK3FVHmy8t1D9DNiSiD9GIWdqFJf4d/JljhD1LXraIU5lRJSYnup2neR5fjcpsiizO5IBWl8lCc=
+  - secure: KOFO9KpTAIzWYx4nBrVLWmYXzn1F1LmhPZTzaLSbHVdWyMv3s3hLPAb/UCZiX4W0ze9FBNdBwkvghWWBvh24cRMSGQYQZc9DEKj3KG19QQflKP2Ubww4LeB+DRuY1G+hchgUcN6fvGK6+pktDzCeYu/KGIFQtyWTVMxP7tTcZYYLbExJiOuD4IMn9McybwImgbYqPVEuGsAxy1k68rv7yO6pV72QYSDizAawd24r88GEKPu7q893+aFW8sA02ZUHgzZhmnyMZdZyOyKlUFt+zzqu6k6AcfL09CP3eLZWw0rMRtkB9hPIQI/nocRSiQcjJldXjiZS29xuNZqHDPw2yEJiW8eDGQPiwsjimamxi/3ztEfa9G+2HjMQ3Al9jDRctZuVoS4CS7Oo4Yl4dJ2KR3BQ90tPM0MYxijrjE45JC8e0zSohdiF9Ds4AQ24e6L14I2LuYIyKBQ0xzlNO5Z6EJrfj26OoBsdjltUOVdeE1Q8dy4mcezZ7/qZ7+7QAJ+0sihUxeE7Tx5ZsnUZYFWDFBytQ0BM8if4XSXruofCxdHBjppYh65SXQhly99S+9zAoWj77T+FghjTO0y+9vfjS4yMXVcTFJ4LZ6+bVxm0uP/xSzTEfCxNQtHIH3Qxdqt3wZZvsN0iRvWilLIgSzsYzIRcCX5FGhsKPkILQclTtYM=
