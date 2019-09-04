@@ -44,7 +44,7 @@ def get_sae_project (group_list):
 def logout():
     # resp = selfserve.session.get("/auth/realms/%s/protocol/openid-connect/logout" % oauth_realm)
     # assert resp.ok
-    del selfserve.token
+    session.clear()
     return redirect(url_for("keycloak.login"))
 
 @selfserve.route("/")
@@ -52,6 +52,7 @@ def _selfserve():
     try:
         if not selfserve.session.authorized:
             return redirect(url_for("keycloak.login"))
+
         resp = selfserve.session.get("/auth/realms/%s/protocol/openid-connect/userinfo" % oauth_realm)
         assert resp.ok
 
@@ -83,7 +84,8 @@ def main():
     if not selfserve.session.authorized:
         return redirect(url_for("keycloak.login"))
 
-    saeProject = get_sae_project(session['groups'])
+    if not 'groups' in session:
+        return render_template('error.html', message = "Access Denied")
 
     return render_template('index.html', repo_list=get_linked_repos(), unlinked_repo_list=get_unlinked_repos(), groups=session['groups'], project=get_sae_project(session['groups']), tab={"create":"show active"})
 
@@ -91,6 +93,8 @@ def main():
 @selfserve.route('/activity',
            methods=['GET'], strict_slashes=False)
 def view_activity() -> object:
+    if not 'groups' in session:
+        return render_template('error.html', message = "Access Denied")
 
     with open('/audit/activity.log', 'r') as f:
         content = f.readlines()
@@ -110,6 +114,9 @@ def new_repo() -> object:
     data = request.form
 
     conf = Config().data
+
+    if not 'groups' in session:
+        return render_template('error.html', message = "Access Denied")
 
     saeProjectName = get_sae_project(session['groups'])
 
@@ -146,6 +153,9 @@ def rename_repo() -> object:
 
     conf = Config().data
 
+    if not 'groups' in session:
+        return render_template('error.html', message = "Access Denied")
+
     saeProjectName = get_sae_project(session['groups'])
 
     newRepoName = ""
@@ -177,6 +187,9 @@ def join_repo() -> object:
 
     conf = Config().data
 
+    if not 'groups' in session:
+        return render_template('error.html', message = "Access Denied")
+
     saeProjectName = get_sae_project(session['groups'])
 
     try:
@@ -205,6 +218,9 @@ def leave_repo() -> object:
     data = request.form
 
     conf = Config().data
+
+    if not 'groups' in session:
+        return render_template('error.html', message = "Access Denied")
 
     saeProjectName = get_sae_project(session['groups'])
 
