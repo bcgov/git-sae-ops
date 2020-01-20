@@ -56,10 +56,13 @@
                                     <a class="nav-link {{tab['rename']}}" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Rename Repo</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link {{tab['join']}}" id="contact-tab" data-toggle="tab" href="#contact" role="tab" aria-controls="contact" aria-selected="false">Join Repo</a>
+                                    <a class="nav-link {{tab['join']}}" id="join-tab" data-toggle="tab" href="#contact" role="tab" aria-controls="contact" aria-selected="false">Join Repo</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link {{tab['leave']}}" id="contact-tab" data-toggle="tab" href="#leave" role="tab" aria-controls="leave" aria-selected="false">Leave Repo</a>
+                                    <a class="nav-link {{tab['leave']}}" id="leave-tab" data-toggle="tab" href="#leave" role="tab" aria-controls="leave" aria-selected="false">Leave Repo</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link {{tab['delete']}}" id="delete-tab" data-toggle="tab" href="#delete" role="tab" aria-controls="delete" aria-selected="false">Delete Repo</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link {{tab['activity']}}" id="activity-tab" data-toggle="tab" href="#activity" role="tab" aria-controls="activity" aria-selected="false">Activity</a>
@@ -166,6 +169,30 @@
                                             </div>
                                             <button type="submit" class="btn btn-primary">Submit</button>
                                         </form>                                    
+                                </div>
+                                <div class="tab-pane fade {{tab['delete']}}" id="delete" role="tabpanel" aria-labelledby="delete-tab">
+
+                                    <h2>Delete Repository</h2>
+                                    <form action="/v1/selfserve/projectsc/repository/delete" method="POST" onSubmit="return submitted()">
+                                        <div class="form-group">
+                                            <label for="exampleInputEmail1">Select Repository (only showing repos not sharing with any SAE projects):</label>
+                                            {% for value in noshares_repo_list %}
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="repository" id="delete_{{ value.name }}" value="{{ value.name }}">
+                                                    <label class="form-check-label" for="delete_{{ value.name }}">
+                                                            {{ value.name }}
+                                                                    {% if value.private %}
+                                                                        <span class="badge badge-pill badge-secondary">private</span>
+                                                                    {% endif %}
+                                                    </label>
+                                                </div>
+                                            {% endfor %}
+                                            {% if noshares_repo_list.__len__() == 0 %}
+                                            <p><i>No repositories found.</i></p>
+                                            {% endif %}
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Submit</button>
+                                    </form>
                                 </div>
                                 <div class="tab-pane fade {{tab['activity']}}" id="activity" role="tabpanel" aria-labelledby="activity-tab">
                                         <h2>Activity</h2>

@@ -13,5 +13,5 @@ class Enquiry():
 
         shares = glapi.get_group("shares")
 
-        projects = shares.projects.list()
+        projects = shares.projects.list(retry_transient_errors=True)
         return projects

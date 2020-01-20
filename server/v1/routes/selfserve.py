@@ -8,6 +8,7 @@ from datetime import timezone
 from operations.enquiry import Enquiry
 from operations.repo import RepoOp
 from operations.rename import Rename
+from operations.delete import Delete
 from clients.gitlab_api import GitlabAPI
 from server.activity.activity import activity
 
@@ -87,7 +88,7 @@ def main():
     if not 'groups' in session:
         return render_template('error.html', message = "Access Denied")
 
-    return render_template('index.html', repo_list=get_linked_repos(), unlinked_repo_list=get_unlinked_repos(), groups=session['groups'], project=get_sae_project(session['groups']), tab={"create":"show active"})
+    return render_template('index.html', repo_list=get_linked_repos(), unlinked_repo_list=get_unlinked_repos(), noshares_repo_list=get_noshares_repos(), groups=session['groups'], project=get_sae_project(session['groups']), tab={"create":"show active"})
 
 
 @selfserve.route('/activity',
@@ -241,6 +242,35 @@ def leave_repo() -> object:
 
     return do_render_template(success=True, data=data, action="leave", tab={"leave":"show active"}, message="Repository %s access removed for project %s" % (repoName, saeProjectName))
 
+@selfserve.route('/projectsc/repository/delete',
+           methods=['POST'], strict_slashes=False)
+def delete_repo() -> object:
+    """
+    Delete a repository
+    """
+    data = request.form
+
+    conf = Config().data
+
+    if not 'groups' in session:
+        return render_template('error.html', message = "Access Denied")
+
+    saeProjectName = get_sae_project(session['groups'])
+
+    newRepoName = ""
+
+    try:
+        validate (data, ['repository'])
+        repoName = data['repository']
+
+        Delete(conf).delete(repoName)
+    except BaseException as error:
+        print("Exception %s" % error)
+        return do_render_template(success=False, data=data, action="delete", tab={"delete":"show active"}, message="Failed to delete %s - %s" % (repoName, error))
+
+    return do_render_template(success=True, data=data, action="delete", tab={"delete":"show active"}, message="Repository %s deleted" % (repoName))
+
+
 def get_linked_repos():
     saeProject = get_sae_project(session['groups'])
 
@@ -279,7 +309,13 @@ def get_unlinked_repos():
 
     return repo_list
 
-
+def get_noshares_repos():
+    new_list = []
+    repo_list = get_unlinked_repos()
+    for r in repo_list:
+        if r["share_count"] == 0:
+            new_list.append(r)
+    return new_list
 
 def validate (data, names):
     for name in names:
@@ -292,6 +328,6 @@ def do_render_template(**args):
         team = get_sae_project(session['groups'])
         actor = session['username']
         activity (args['action'], args['data']['repository'], team, actor, args['success'], args['message'])
-    return render_template('index.html', **args, repo_list=get_linked_repos(), unlinked_repo_list=get_unlinked_repos(), groups=session['groups'], project=get_sae_project(session['groups']))
+    return render_template('index.html', **args, repo_list=get_linked_repos(), unlinked_repo_list=get_unlinked_repos(), noshares_repo_list=get_noshares_repos(), groups=session['groups'], project=get_sae_project(session['groups']))
 
 

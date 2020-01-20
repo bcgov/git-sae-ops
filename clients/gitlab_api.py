@@ -18,7 +18,7 @@ class GitlabAPI():
 
     def get_group(self, aGroup):
         log.info('{0:30} {1}'.format('get_group', aGroup))
-        groups = self.gl.groups.list(search=aGroup)
+        groups = self.gl.groups.list(search=aGroup, retry_transient_errors=True)
         for group in groups:
             if group.name == aGroup:
                 log.info('{0:30} {1} id:{2}'.format('', aGroup, group.id))
@@ -27,29 +27,29 @@ class GitlabAPI():
 
     def create_get_group(self, aGroup):
         log.info('{0:30} {1}'.format('create_get_group', aGroup))
-        groups = self.gl.groups.list(search=aGroup)
+        groups = self.gl.groups.list(search=aGroup, retry_transient_errors=True)
         for group in groups:
             if group.name == aGroup:
                 log.info('{0:30} {1} id:{2}'.format('', aGroup, group.id))
                 return group.id
         log.info('{0:30} {1} CREATING'.format('', aGroup))
-        group = self.gl.groups.create({'name':aGroup, 'path':aGroup, 'visibility':'private'})
+        group = self.gl.groups.create({'name':aGroup, 'path':aGroup, 'visibility':'private'}, retry_transient_errors=True)
         log.info('{0:30} {1} id:{2}'.format('', aGroup, group.id))
         return group.id
 
     def create_get_project(self, aNamespaceId, aProject):
         log.info('{0:30} {1} in group:{2}'.format('create_get_project', aProject, aNamespaceId))
-        projects = self.gl.projects.list(search=aProject)
+        projects = self.gl.projects.list(search=aProject, retry_transient_errors=True)
         for project in projects:
             if project.name == aProject and project.namespace['id'] == aNamespaceId:
                 return project.id
         log.info('{0:30} {1} CREATING'.format('', aProject))
-        project = self.gl.projects.create({'name':aProject, 'namespace_id':aNamespaceId, 'initialize_with_readme':False})
+        project = self.gl.projects.create({'name':aProject, 'namespace_id':aNamespaceId, 'initialize_with_readme':False}, retry_transient_errors=True)
         return project.id
 
     def import_get_project(self, aNamespaceId, aProject, aUrl):
         log.info('{0:30} {1} URL {2}'.format('import_get_project', aProject, aUrl))
-        projects = self.gl.projects.list(search=aProject)
+        projects = self.gl.projects.list(search=aProject, retry_transient_errors=True)
         for project in projects:
             if project.name == aProject and project.namespace['id'] == aNamespaceId:
                 return project.id
@@ -72,7 +72,7 @@ class GitlabAPI():
 
     def config_project_variant1(self, aProjectId):
         log.info('{0:30} {1} : {2}'.format('config_project', aProjectId, "jobs_enabled"))
-        project = self.gl.projects.get(aProjectId)
+        project = self.gl.projects.get(aProjectId, retry_transient_errors=True)
         if project.jobs_enabled == False:
             project.jobs_enabled = True
         project.repository_enabled = True
@@ -83,11 +83,11 @@ class GitlabAPI():
         project.lfs_enabled = False
         project.only_allow_merge_if_pipeline_succeeds = True
         project.only_allow_merge_if_all_discussions_are_resolved = True
-        project.save()
+        project.save(retry_transient_errors=True)
 
     def config_project_variant2(self, aProjectId):
         log.info('{0:30} {1} : {2}'.format('config_project', aProjectId, "jobs_enabled,issues_disabled,wiki_disabled"))
-        project = self.gl.projects.get(aProjectId)
+        project = self.gl.projects.get(aProjectId, retry_transient_errors=True)
         if project.jobs_enabled == False:
             project.jobs_enabled = True
         project.repository_enabled = True
@@ -99,11 +99,11 @@ class GitlabAPI():
         project.only_allow_merge_if_pipeline_succeeds = True
         project.only_allow_merge_if_all_discussions_are_resolved = True
         # project.auto_devops_attributes = { enabled : False }
-        project.save()
+        project.save(retry_transient_errors=True)
 
     def config_project_variant_shared(self, aProjectId):
         log.info('{0:30} {1} : {2}'.format('config_project', aProjectId, "jobs_enabled,issued_disabled,wiki_disabled"))
-        project = self.gl.projects.get(aProjectId)
+        project = self.gl.projects.get(aProjectId, retry_transient_errors=True)
         project.jobs_enabled = False
         project.repository_enabled = True
         project.issues_enabled = False
@@ -113,11 +113,11 @@ class GitlabAPI():
         project.lfs_enabled = False
         project.only_allow_merge_if_pipeline_succeeds = False
         project.only_allow_merge_if_all_discussions_are_resolved = False
-        project.save()
+        project.save(retry_transient_errors=True)
 
     def config_project_variant_private(self, aProjectId):
         log.info('{0:30} {1} : {2}'.format('config_project', aProjectId, "jobs_enabled,issued_enabled,wiki_enabled"))
-        project = self.gl.projects.get(aProjectId)
+        project = self.gl.projects.get(aProjectId, retry_transient_errors=True)
         project.jobs_enabled = False
         project.repository_enabled = True
         project.issues_enabled = True
@@ -127,7 +127,7 @@ class GitlabAPI():
         project.lfs_enabled = False
         project.only_allow_merge_if_pipeline_succeeds = False
         project.only_allow_merge_if_all_discussions_are_resolved = False
-        project.save()
+        project.save(retry_transient_errors=True)
 
     def approve_merge (self, mr):
 
@@ -194,7 +194,7 @@ class GitlabAPI():
 
     def create_get_branch(self, aNamespaceId, aProject, aBranch, ref = 'master'):
         log.info('{0:30} {1} {2}'.format('create_get_branch', aProject, aBranch))
-        projects = self.gl.projects.list(search=aProject)
+        projects = self.gl.projects.list(search=aProject, retry_transient_errors=True)
         for project in projects:
             if project.name == aProject and project.namespace['id'] == aNamespaceId:
                 branches = project.branches.list()
@@ -207,26 +207,26 @@ class GitlabAPI():
                 create_params = {'branch': aBranch}
                 if ref is not None:
                     create_params['ref'] = ref
-                branch = project.branches.create(create_params)
+                branch = project.branches.create(create_params, retry_transient_errors=True)
                 return branch.name
         raise Exception("Project %s in %s not found" % (aProject, aNamespaceId))
 
     def set_default_branch(self, aNamespaceId, aProject, aBranch):
         log.info('{0:30} {1} {2}'.format('set_default_branch', aProject, aBranch))
-        projects = self.gl.projects.list(search=aProject)
+        projects = self.gl.projects.list(search=aProject, retry_transient_errors=True)
         for project in projects:
             if project.name == aProject and project.namespace['id'] == aNamespaceId:
                 project.default_branch = aBranch
-                project.save()
+                project.save(retry_transient_errors=True)
                 return
         raise Exception("Project %s in %s not found" % (aProject, aNamespaceId))
 
     def has_branch (self, aNamespaceId, aProject, aBranch):
         log.info('{0:30} {1} {2}'.format('has_branch', aProject, aBranch))
-        projects = self.gl.projects.list(search=aProject)
+        projects = self.gl.projects.list(search=aProject, retry_transient_errors=True)
         for project in projects:
             if project.name == aProject and project.namespace['id'] == aNamespaceId:
-                branches = project.branches.list()
+                branches = project.branches.list(retry_transient_errors=True)
                 for branch in branches:
                     if branch.name == aBranch:
                         return True
@@ -235,7 +235,7 @@ class GitlabAPI():
 
     def project_exists(self, aNamespaceId, aProject):
         log.info('{0:30} {1}'.format('get_project', aProject))
-        projects = self.gl.projects.list(search=aProject)
+        projects = self.gl.projects.list(search=aProject, retry_transient_errors=True)
         for project in projects:
             if project.name == aProject and project.namespace['id'] == aNamespaceId:
                 return True
@@ -243,7 +243,7 @@ class GitlabAPI():
 
     def get_project(self, aNamespaceId, aProject):
         log.info('{0:30} {1}'.format('get_project', aProject))
-        projects = self.gl.projects.list(search=aProject)
+        projects = self.gl.projects.list(search=aProject, retry_transient_errors=True)
         for project in projects:
             if project.name == aProject and project.namespace['id'] == aNamespaceId:
                 return project
@@ -251,36 +251,36 @@ class GitlabAPI():
 
     def protect_branch(self, aProjectId, branch):
         log.info('{0:30} branch:{1} for project:{2}'.format('protect_branch', branch, aProjectId))
-        project = self.gl.projects.get(aProjectId)
-        branch = project.branches.get(branch)
-        branch.protect()
+        project = self.gl.projects.get(aProjectId, retry_transient_errors=True)
+        branch = project.branches.get(branch, retry_transient_errors=True)
+        branch.protect(retry_transient_errors=True)
 
     def delete_branch(self, aProjectId, branch):
         log.info('{0:30} branch:{1} for project:{2}'.format('delete_branch', branch, aProjectId))
-        project = self.gl.projects.get(aProjectId)
-        branches = project.branches.list()
+        project = self.gl.projects.get(aProjectId, retry_transient_errors=True)
+        branches = project.branches.list(retry_transient_errors=True)
         for br in branches:
             if br.name == branch:
                 log.info('{0:30} DELETE {1} for project:{2}'.format('', branch, aProjectId))
-                br.delete()
+                br.delete(retry_transient_errors=True)
 
     def unprotect_branch(self, aProjectId, branch):
         log.info('{0:30} branch:{1} for project:{2}'.format('unprotect_branch', branch, aProjectId))
-        project = self.gl.projects.get(aProjectId)
-        branch = project.branches.get(branch)
-        branch.unprotect()
+        project = self.gl.projects.get(aProjectId, retry_transient_errors=True)
+        branch = project.branches.get(branch, retry_transient_errors=True)
+        branch.unprotect(retry_transient_errors=True)
 
     def share_project(self, aProjectId, aGroupId, access):
         log.info('{0:30} Access project:{1} by group:{2} with access:{3}'.format('share_project', aProjectId, aGroupId, access))
-        project = self.gl.projects.get(aProjectId)
+        project = self.gl.projects.get(aProjectId, retry_transient_errors=True)
         try:
             for s in project.shared_with_groups:
                 if (s['group_id'] == aGroupId and s['group_access_level'] != access):
                     log.info('{0:30} Access project:{1} by group:{2} - doing unshare then share.'.format('share_project', aProjectId, aGroupId))
 
-                    project.unshare(aGroupId)
+                    project.unshare(aGroupId, retry_transient_errors=True)
                 
-            project.share(aGroupId, access)
+            project.share(aGroupId, access, retry_transient_errors=True)
         except gitlab.exceptions.GitlabCreateError as error:
             if error.response_code == 409:
                 return
@@ -289,19 +289,31 @@ class GitlabAPI():
 
     def unshare_project(self, aProjectId, aGroupId):
         log.info('{0:30} Unshare project:{1} by group:{2}'.format('unshare_project', aProjectId, aGroupId))
-        project = self.gl.projects.get(aProjectId)
+        project = self.gl.projects.get(aProjectId, retry_transient_errors=True)
         for s in project.shared_with_groups:
             if (s['group_id'] == aGroupId):
-                project.unshare(aGroupId)
+                project.unshare(aGroupId, retry_transient_errors=True)
 
     def get_project_shares(self, aProjectId):
         log.info('{0:30} Get project shares for:{1}'.format('get_project_shares', aProjectId))
-        project = self.gl.projects.get(aProjectId)
+        project = self.gl.projects.get(aProjectId, retry_transient_errors=True)
         try:
             return project.shared_with_groups
         except gitlab.exceptions.GitlabCreateError as error:
             raise error
 
+    def archive_project(self, aProjectId):
+        log.info('{0:30} Archive project:{1}'.format('archive_project', aProjectId))
+        project = self.gl.projects.get(aProjectId, retry_transient_errors=True)
+
+        archive_id = self.create_get_group("archive")
+        project.name = "%s-%06d" % (project.name, project.id)
+        project.path = "%s-%06d" % (project.name, project.id)
+        project.save(retry_transient_errors=True)
+        project.transfer_project (archive_id, retry_transient_errors=True)
+
+        for s in project.shared_with_groups:
+            project.unshare(s['group_id'], retry_transient_errors=True)
 
     def create_get_fork(self, aProjectId, aGroupName):
         log.info('{0:30} Create fork of project:{1} to group:{2}'.format('create_get_fork', aProjectId, aGroupName))
@@ -328,11 +340,11 @@ class GitlabAPI():
 
     def add_file (self, aProjectId, branch, fileName, fileContents, message = None):
         log.info('{0:30} Add file:{1} in branch {2} file:{3}'.format('add_file', aProjectId, branch, fileName))
-        project = self.gl.projects.get(aProjectId)
+        project = self.gl.projects.get(aProjectId, retry_transient_errors=True)
         try:
-            f = project.files.get(file_path=fileName, ref=branch)
+            f = project.files.get(file_path=fileName, ref=branch, retry_transient_errors=True)
             f.content = fileContents
-            f.save(branch=branch, commit_message="Update %s" % fileName)
+            f.save(branch=branch, commit_message="Update %s" % fileName, retry_transient_errors=True)
 
         except gitlab.exceptions.GitlabGetError as error:
             if error.response_code == 404:
@@ -341,6 +353,6 @@ class GitlabAPI():
                                 'content': fileContents,
                                 'author_email': 'no-reply@popdata.local',
                                 'author_name': 'Automation Agent',
-                                'commit_message': "Added %s" % fileName if (message is None) else message})
+                                'commit_message': "Added %s" % fileName if (message is None) else message}, retry_transient_errors=True)
                 log.info(f)
 
