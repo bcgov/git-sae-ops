@@ -4,6 +4,7 @@ from flask_dance.consumer import OAuth2ConsumerBlueprint
 import json
 import oauthlib
 import datetime
+import traceback
 from datetime import timezone
 from operations.enquiry import Enquiry
 from operations.repo import RepoOp
@@ -136,6 +137,7 @@ def new_repo() -> object:
         RepoOp(glapi).run(saeProjectName, repoName, private)
     except BaseException as error:
         print("Exception %s" % error)
+        print(traceback.format_exc())
         return do_render_template(success=False, data=data, action="create", tab={"create":"show active"}, message="Failed - %s" % error)
 
     message = "Shared repository %s created" % data['repository']

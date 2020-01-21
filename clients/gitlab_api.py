@@ -197,7 +197,7 @@ class GitlabAPI():
         projects = self.gl.projects.list(search=aProject, retry_transient_errors=True)
         for project in projects:
             if project.name == aProject and project.namespace['id'] == aNamespaceId:
-                branches = project.branches.list()
+                branches = project.branches.list(retry_transient_errors=True)
                 for branch in branches:
                     if branch.name == aBranch:
                         return branch.name
