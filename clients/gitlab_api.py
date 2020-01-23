@@ -1,6 +1,6 @@
 import gitlab
 
-from gitlab.exceptions import GitlabError
+from gitlab.exceptions import GitlabError, GitlabCreateError
 
 import logging
 log = logging.getLogger(__name__)
@@ -192,7 +192,7 @@ class GitlabAPI():
                                    'labels': labels})
         return mr
 
-    def create_get_branch(self, aNamespaceId, aProject, aBranch, ref = 'master'):
+    def create_get_branch(self, aNamespaceId, aProject, aBranch, ref = 'master', attempt = 0):
         log.info('{0:30} {1} {2}'.format('create_get_branch', aProject, aBranch))
         projects = self.gl.projects.list(search=aProject, retry_transient_errors=True)
         for project in projects:
@@ -207,8 +207,15 @@ class GitlabAPI():
                 create_params = {'branch': aBranch}
                 if ref is not None:
                     create_params['ref'] = ref
-                branch = project.branches.create(create_params, retry_transient_errors=True)
-                return branch.name
+                try:
+                    branch = project.branches.create(create_params)
+                except GitlabCreateError as err:
+                    if err.response_code == 502 and attempt == 0:
+                        log.info('{0:30} {1} FAILED WITH 502 - try again'.format('', aBranch))
+                        return self.create_get_branch(aNamespaceId, aProject, aBranch, ref, attempt + 1)
+                    else:
+                        raise err
+                return aBranch
         raise Exception("Project %s in %s not found" % (aProject, aNamespaceId))
 
     def set_default_branch(self, aNamespaceId, aProject, aBranch):
