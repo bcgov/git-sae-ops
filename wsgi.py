@@ -11,6 +11,7 @@ from gevent.pywsgi import WSGIServer
 # from server import app
 from timeit import default_timer as timer
 from server.app import create_app
+import server.group_setup as group_setup
 
 app = create_app()
 
@@ -61,6 +62,8 @@ def main(port: int = conf.data['apiPort']) -> object:
 
     log.info("adding signal catcher")
     signal.signal(signal.SIGINT, sigInt_handler)
+
+    group_setup.setup()
 
     # log.info("initializing validation process...")
     # validationHeaderProcess = Validator()
