@@ -16,6 +16,10 @@ class GitlabAPI():
         user.can_create_group = 1 
         user.save()
 
+    def get_all_groups(self):
+        log.info('{0:30}'.format('get_all_groups'))
+        return self.gl.groups.list(all=True, retry_transient_errors=True)
+
     def get_group(self, aGroup):
         log.info('{0:30} {1}'.format('get_group', aGroup))
         groups = self.gl.groups.list(search=aGroup, retry_transient_errors=True)

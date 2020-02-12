@@ -20,6 +20,11 @@ class ProjectOp():
 
         return glapi.get_group(saeProjectName)
 
+    def get_all_groups (self):
+        glapi = self.glapi
+
+        return glapi.get_all_groups()
+
     def get_project_by_id (self, repo):
         glapi = self.glapi
 

@@ -89,7 +89,8 @@ def main():
     if not 'groups' in session:
         return render_template('error.html', message = "Access Denied")
 
-    return render_template('index.html', repo_list=get_linked_repos(), unlinked_repo_list=get_unlinked_repos(), noshares_repo_list=get_noshares_repos(), groups=session['groups'], project=get_sae_project(session['groups']), tab={"create":"show active"})
+    linked_repos = get_linked_repos()
+    return render_template('index.html', repo_list=linked_repos, unlinked_repo_list=get_unlinked_repos(), noshares_repo_list=get_noshares_repos(linked_repos), groups=session['groups'], project=get_sae_project(session['groups']), tab={"create":"show active"})
 
 
 @selfserve.route('/activity',
@@ -286,9 +287,7 @@ def get_linked_repos():
                 share_count = len(project.shared_with_groups) - 1
                 repo_list.append({"name":project.name, "url":project.http_url_to_repo, "private":private, "share_count":share_count})
 
-    print(repo_list)
-
-    return repo_list
+    return sorted(repo_list, key=lambda item: item['name'])
 
 def get_unlinked_repos():
     saeProject = get_sae_project(session['groups'])
@@ -307,15 +306,12 @@ def get_unlinked_repos():
             share_count = len(project.shared_with_groups) - 1
             repo_list.append({"name":project.name, "url":project.http_url_to_repo, "private":private, "share_count":share_count})
 
-    print(repo_list)
+    return sorted(repo_list, key=lambda item: item['name'])
 
-    return repo_list
-
-def get_noshares_repos():
+def get_noshares_repos(repo_list):
     new_list = []
-    repo_list = get_unlinked_repos()
     for r in repo_list:
-        if r["share_count"] == 0:
+        if r["share_count"] == 1:
             new_list.append(r)
     return new_list
 
@@ -330,6 +326,7 @@ def do_render_template(**args):
         team = get_sae_project(session['groups'])
         actor = session['username']
         activity (args['action'], args['data']['repository'], team, actor, args['success'], args['message'])
-    return render_template('index.html', **args, repo_list=get_linked_repos(), unlinked_repo_list=get_unlinked_repos(), noshares_repo_list=get_noshares_repos(), groups=session['groups'], project=get_sae_project(session['groups']))
+    linked_repos = get_linked_repos()
+    return render_template('index.html', **args, repo_list=linked_repos, unlinked_repo_list=get_unlinked_repos(), noshares_repo_list=get_noshares_repos(linked_repos), groups=session['groups'], project=get_sae_project(session['groups']))
 
 
