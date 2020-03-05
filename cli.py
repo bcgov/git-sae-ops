@@ -25,6 +25,8 @@ TOKEN = os.environ['PROJECTSC_TOKEN']
 
 OUTPUTCHECKERS = "oc"
 
+SHARES = "shares"
+
 CROSS_PROJECT_CHECKER = "oc"
 
 OCWA_CHECKPOINT = "ocwa-checkpoint"
@@ -196,11 +198,13 @@ elif command == 'init' and args.destroy == False:
 
     glapi.create_get_group(OCWA_CHECKPOINT)
     glapi.create_get_group(OUTPUTCHECKERS)
+    glapi.create_get_group(SHARES)
 
     token = None
     if 'token' in args:
         token = args.token
-    glapi.create_hook(args.hook, token)
+    if 'hook' in args:
+        glapi.create_hook(args.hook, token)
 
 else:
     raise Exception("Invalid command %s (destroy=%s)" % (command, args.destroy))
