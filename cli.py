@@ -203,7 +203,8 @@ elif command == 'init' and args.destroy == False:
     token = None
     if 'token' in args:
         token = args.token
-    if 'hook' in args:
+
+    if args.hook is not None:
         glapi.create_hook(args.hook, token)
 
 else:

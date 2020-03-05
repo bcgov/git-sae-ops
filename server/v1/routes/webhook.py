@@ -8,6 +8,7 @@ from server.config import Config
 import requests
 import json
 import sys
+import traceback
 from server.auth.auth import auth
 from operations.push_changes import PushChanges
 
@@ -89,6 +90,8 @@ def gitlab_webhook() -> object:
                 else:
                     raise Exception("Unexpected source branch %s" % source)
             except BaseException as error:
+                track = traceback.format_exc()
+                print(track)
                 activity ('push_to_external', repoName, '', 'gitlab', False, "Push failed - %s" % error)
         else:
             log.debug("-- MR Ignored - state %s" % data['object_attributes']['state'])
