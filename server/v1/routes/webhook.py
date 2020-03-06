@@ -35,19 +35,24 @@ def gitlab_merge_retry() -> object:
     target = data['target_branch']
     log.debug("%s --> %s" % (source,target))
 
-    if source.endswith('-outgoing'):
-        repoName = data['repository']
-        log.debug("push_to_external (%s, %s, %s)" % (repoName, None, target))
-        PushChanges(conf).push_to_external(repoName, None, target)
-        log.info("Successful push_to_external mirror")
+    try:
+        if source.endswith('-outgoing'):
+            repoName = data['repository']
+            log.debug("push_to_external (%s, %s, %s)" % (repoName, None, target))
+            PushChanges(conf).push_to_external(repoName, None, target)
+            log.info("Successful push_to_external mirror")
 
-    elif source.endswith('-incoming'):
-        repoName = data['repository']
-        log.debug("push_to_sae (%s, %s)" % (repoName, target))
-        PushChanges(conf).push_to_sae(repoName, target)
-        log.info("Successful push_to_sae mirror")
-    else:
-        log.debug("ERR: Unexpected source branch %s" % source)
+        elif source.endswith('-incoming'):
+            repoName = data['repository']
+            log.debug("push_to_sae (%s, %s)" % (repoName, target))
+            PushChanges(conf).push_to_sae(repoName, target)
+            log.info("Successful push_to_sae mirror")
+        else:
+            log.debug("ERR: Unexpected source branch %s" % source)
+    except BaseException as error:
+        track = traceback.format_exc()
+        log.error("Trace... %s" % str(track))
+        raise error
 
     return jsonify(status="ok"), HTTPStatus.OK
     
@@ -91,7 +96,7 @@ def gitlab_webhook() -> object:
                     raise Exception("Unexpected source branch %s" % source)
             except BaseException as error:
                 track = traceback.format_exc()
-                print(track)
+                log.error("Trace... %s" % str(track))
                 activity ('push_to_external', repoName, '', 'gitlab', False, "Push failed - %s" % error)
         else:
             log.debug("-- MR Ignored - state %s" % data['object_attributes']['state'])
