@@ -32,6 +32,14 @@ class GitAPI():
                 return True
         return False
 
+    def is_empty(self):
+        return len(self.cloned_repo.refs) == 0
+        
+    def init(self):
+        log.info('{0:30}'.format('gitapi.init'))
+        repo = self.cloned_repo
+        repo.git.init()
+
     def checkout_new(self, branch):
         log.info('{0:30} {1} '.format('gitapi.checkout_new', branch))
         repo = self.cloned_repo
