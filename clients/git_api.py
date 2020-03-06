@@ -46,7 +46,6 @@ class GitAPI():
         log.info('{0:30} {1} '.format('gitapi.checkout_new', branch))
         repo = self.cloned_repo
         repo.git.checkout('-b', branch)
-        return repo.head.commit
 
     def checkout(self, branch):
         log.info('{0:30} {1} '.format('gitapi.checkout', branch))
