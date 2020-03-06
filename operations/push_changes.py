@@ -34,8 +34,8 @@ class PushChanges():
         tgit = GitAPI(importUrl, self.github_token)
         tgit.info()
         if tgit.is_empty():
-            tgit.init()
-            
+            tgit.init_repo()
+
         if tgit.has_branch(branch):
             tgit.checkout(branch)
         else:

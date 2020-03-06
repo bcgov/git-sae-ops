@@ -9,7 +9,7 @@ class GitAPI():
     def __init__(self, git_url, token = None):
         self.repo_dir = tempfile.mkdtemp()
         repo_dir = self.repo_dir
-        log.info('{0:30} {1} '.format('gitapi.init', git_url))
+        log.info('{0:30} {1} '.format('gitapi()', git_url))
 
         self.git_url = git_url
         self.cloned_repo = Repo.clone_from(self.prepare_url(git_url, token), repo_dir)
@@ -33,10 +33,12 @@ class GitAPI():
         return False
 
     def is_empty(self):
+        log.info('{0:30} {1}'.format('gitapi.is_empty', self.cloned_repo.refs))
+        log.info('{0:30} {1}'.format('gitapi.is_empty', str(len(self.cloned_repo.refs))))
         return len(self.cloned_repo.refs) == 0
-        
-    def init(self):
-        log.info('{0:30}'.format('gitapi.init'))
+
+    def init_repo(self):
+        log.info('{0:30}'.format('gitapi.init_repo'))
         repo = self.cloned_repo
         repo.git.init()
 
