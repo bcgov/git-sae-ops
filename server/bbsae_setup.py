@@ -2,11 +2,14 @@ import os
 import sys
 import logging
 import base64
+import traceback
 from server.config import Config
 from server.v1.routes.selfserve import selfserve
 from operations.project import ProjectOp
 from operations.repo import RepoOp
 from clients.gitlab_api import GitlabAPI
+from clients.tekton_api import TektonAPI
+from server.activity.activity import activity
 
 def setup():
     log = logging.getLogger(__name__)
@@ -20,6 +23,17 @@ def setup():
     rop = RepoOp(glapi)
 
     log.debug("SETUP BBSAE START")
+    #pipeline_url = conf.get('bbsae').get('pipeline_url')
+    #api = TektonAPI(pipeline_url)
+    #log.info("Notifying %s" % pipeline_url)
+    #try:
+    #    response = api.notify()
+    #    activity ('trigger_image_pipeline', '', '', 'gitlab', True, "%s" % response)
+    #except BaseException as error:
+    #    track = traceback.format_exc()
+    #    log.error("Trace... %s" % str(track))
+    #    activity ('trigger_image_pipeline', '', '', 'gitlab', False, "%s" % error)
+
     
     # Setup requires the following:
     # - create a shared project: "bbsae-applications"
