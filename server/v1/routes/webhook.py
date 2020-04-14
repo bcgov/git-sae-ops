@@ -116,7 +116,7 @@ def gitlab_webhook() -> object:
             except BaseException as error:
                 track = traceback.format_exc()
                 log.error("Trace... %s" % str(track))
-                activity ('trigger_image_pipeline', '', '', 'gitlab', False, "%s" % error)
+                activity ('trigger_image_pipeline', data['project']['name'], '', 'gitlab', False, "%s" % error)
 
     elif "event_type" in data:
         log.info("Skipping event TYPE: %s" % data['event_type'])
