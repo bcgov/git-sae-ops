@@ -110,8 +110,13 @@ def gitlab_webhook() -> object:
             pipeline_url = conf.get('bbsae').get('pipeline_url')
             api = TektonAPI(pipeline_url)
             log.info("Notifying %s" % pipeline_url)
-            response = api.notify()
-            activity ('trigger_image_pipeline', data['project']['name'], '', 'gitlab', True, "%s" % response)
+            try:
+                response = api.notify()
+                activity ('trigger_image_pipeline', data['project']['name'], '', 'gitlab', True, "%s" % response)
+            except BaseException as error:
+                track = traceback.format_exc()
+                log.error("Trace... %s" % str(track))
+                activity ('trigger_image_pipeline', '', '', 'gitlab', False, "%s" % error)
 
     elif "event_type" in data:
         log.info("Skipping event TYPE: %s" % data['event_type'])
