@@ -358,7 +358,7 @@ class GitlabAPI():
         log.info('{0:30} {1} CREATED'.format('', url))
         hook = self.gl.hooks.create({'url': url, 'token': token, 'enable_ssl_verification': False, 'merge_requests_events': True, 'repository_update_events': True})
 
-    def add_deploy_key (self, aProjectId, key_name, pub_key):
+    def add_deploy_key (self, aProjectId, key_name, pub_key, read_only = True):
         log.info('{0:30} Add deploy key:{1} {2}'.format('add_deploy_key', aProjectId, key_name))
         project = self.gl.projects.get(aProjectId, retry_transient_errors=True)
         for k in project.keys.list():
@@ -367,8 +367,12 @@ class GitlabAPI():
                 return
 
         key = project.keys.create({'title': key_name,
-                           'key': pub_key})
+                           'key': pub_key, 'can_push': read_only == False})
+
         log.info('{0:30} Add deploy key:{1} {2} CREATED.'.format('add_deploy_key', aProjectId, key_name))
+
+        project.keys.enable(key.id)
+        log.info('{0:30} Add deploy key:{1} {2} ENABLED.'.format('add_deploy_key', aProjectId, key_name))
 
     def add_file (self, aProjectId, branch, fileName, fileContents, message = None):
         log.info('{0:30} Add file:{1} in branch {2} file:{3}'.format('add_file', aProjectId, branch, fileName))
@@ -388,3 +392,48 @@ class GitlabAPI():
                                 'commit_message': "Added %s" % fileName if (message is None) else message}, retry_transient_errors=True)
                 log.info(f)
 
+
+    def create_get_user(self, username, password):
+        log.info('{0:30} Create user:{1} '.format('create_get_user', username))
+        nms = self.gl.users.list(search=username, retry_transient_errors=True)
+        for user in nms:
+            if user.username == username:
+                log.info('{0:30} Create user:{1} ALREADY EXISTS'.format('create_get_user', username))
+                return user
+
+        result = self.gl.users.create({'username': username, 
+                            'email': "%s@local" % username, 
+                            'force_random_password': True, 
+                            'reset_password': False,
+                            'password': password,
+                            'name': username})
+        log.info('{0:30} Create user:{1} CREATED'.format('create_get_user', username))
+        log.info('{0:30} {1} id:{2}'.format('', username, str(result)))
+
+        return result
+
+    def add_project_member (self, project, user):
+        log.info('{0:30} Add user {1} to project {2}'.format('add_project_member', user.username, project.id))
+        try:
+            member = project.members.create({'user_id': user.id, 'access_level':
+                                 gitlab.DEVELOPER_ACCESS})
+        except gitlab.exceptions.GitlabCreateError as error:
+            if error.response_code == 409:
+                log.info('{0:30} Add user {1} to project {2} ALREADY EXISTS'.format('', user.username, project.id))
+                return
+            raise error
+            
+
+    def create_personal_access_token (self, user, name):
+        log.info('{0:30} Token for {1}'.format('create_personal_access_token', user.username))
+        tokens = user.impersonationtokens.list()
+        log.info(str(tokens))
+        for token in tokens:
+            if token.name == name and token.revoked == False:
+                log.info('{0:30} Token for {1} ALREADY EXISTS'.format('', user.username))
+                return None
+
+        i_t = user.impersonationtokens.create({'name': name, 'scopes': ['api']})
+        log.info('{0:30} Token CREATED {1}'.format('', str(i_t)))
+        return i_t.token
+                                         

@@ -23,6 +23,14 @@ def setup():
     rop = RepoOp(glapi)
 
     log.debug("SETUP BBSAE START")
+
+    user = glapi.create_get_user ('bbsae-tekton-principal', conf.get('bbsae').get('access_token'))
+
+    tok = glapi.create_personal_access_token(user, 'tekton-pat')
+    if tok is not None:
+        with open ("%s.token" % 'tekton-pat', 'w') as outfile:
+            outfile.write(tok)
+
     #pipeline_url = conf.get('bbsae').get('pipeline_url')
     #api = TektonAPI(pipeline_url)
     #log.info("Notifying %s" % pipeline_url)
@@ -41,17 +49,22 @@ def setup():
     # - add default files
     # - add a Deploy Key to the project
 
-    pub_key_b64 = conf.get('bbsae').get('ssh_key_pub')
-    pub_key = base64.b64decode(pub_key_b64)
+    #pub_key_b64 = conf.get('bbsae').get('ssh_key_pub')
+    #pub_key = base64.b64decode(pub_key_b64).decode('utf-8')
     repoName = conf.get('bbsae').get('project_name')
 
-    public = glapi.create_get_group("ocwa-checkpoint")
+    shares = glapi.create_get_group("shares")
 
-    if glapi.project_exists(public, repoName):
+    if glapi.project_exists(shares, repoName):
         log.debug("Project %s already exists" % repoName)
     else:
         rop.run(None, repoName, False)
 
-        #glapi.add_deploy_key ('bbsae_pipelines', pub_key)
+    project = glapi.get_project(shares, repoName)
+
+    glapi.add_project_member (project, user)
+
+    # Create a deploy key
+    #glapi.add_deploy_key (project.id, 'bbsae-tekton-access', pub_key, False)
 
     log.debug("SETUP BBSAE DONE")
