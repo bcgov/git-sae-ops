@@ -358,6 +358,18 @@ class GitlabAPI():
         log.info('{0:30} {1} CREATED'.format('', url))
         hook = self.gl.hooks.create({'url': url, 'token': token, 'enable_ssl_verification': False, 'merge_requests_events': True, 'repository_update_events': True})
 
+    def add_deploy_key (self, aProjectId, key_name, pub_key):
+        log.info('{0:30} Add deploy key:{1} {2}'.format('add_deploy_key', aProjectId, key_name))
+        project = self.gl.projects.get(aProjectId, retry_transient_errors=True)
+        for k in project.keys.list():
+            if k.title == key_name:
+                log.info('{0:30} Add deploy key:{1} {2} ALREADY CREATED.'.format('add_deploy_key', aProjectId, key_name))
+                return
+
+        key = project.keys.create({'title': key_name,
+                           'key': pub_key})
+        log.info('{0:30} Add deploy key:{1} {2} CREATED.'.format('add_deploy_key', aProjectId, key_name))
+
     def add_file (self, aProjectId, branch, fileName, fileContents, message = None):
         log.info('{0:30} Add file:{1} in branch {2} file:{3}'.format('add_file', aProjectId, branch, fileName))
         project = self.gl.projects.get(aProjectId, retry_transient_errors=True)

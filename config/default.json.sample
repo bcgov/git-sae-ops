@@ -30,6 +30,13 @@
     "ocwa": {
         "ignoredGroups": "/sre-users,/exporterstg,/exporter,/oc,/reports"
         "projectWhitelist": ""
+    },
+
+    "bbsae": {
+        "project_name": "bbsae-applications",
+        "enabled": true,
+        "ssh_key_pub": "",
+        "pipeline_url": "https://ds-infra-listener.stg.bbsae.xyz:443"
     }
 
 }

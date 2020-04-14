@@ -266,6 +266,9 @@ def delete_repo() -> object:
         validate (data, ['repository'])
         repoName = data['repository']
 
+        if repoName == conf.get("bbsae").get("project_name"):
+            return render_template('error.html', message = "This is a protected project.  Deletion request denied")
+
         Delete(conf).delete(repoName)
     except BaseException as error:
         print("Exception %s" % error)

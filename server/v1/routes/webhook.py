@@ -11,6 +11,7 @@ import sys
 import traceback
 from server.auth.auth import auth
 from operations.push_changes import PushChanges
+from clients.tekton_api import TektonAPI
 
 from server.activity.activity import activity
 
@@ -102,6 +103,16 @@ def gitlab_webhook() -> object:
             log.debug("-- MR Ignored - state %s" % data['object_attributes']['state'])
     elif "event_name" in data:
         log.info("Skipping event NAME: %s" % data['event_name'])
+        if data['event_name'] == 'repository_update' 
+          and conf.get('bbsae').get('project_name') == data['project']['name']
+          and conf.get('bbsae').get('enabled'):
+            log.info("BBSAE Enabled.  If push of bbsae-applications, then trigger build")
+            pipeline_url = conf.get('bbsae').get('pipeline_url')
+            api = TektonAPI(pipeline_url)
+            log.info("Notifying %s" % pipeline_url)
+            response = api.notify()
+            activity ('trigger_image_pipeline', data['project']['name'], '', 'gitlab', False, "%s" % response)
+
     elif "event_type" in data:
         log.info("Skipping event TYPE: %s" % data['event_type'])
     else:

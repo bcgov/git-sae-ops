@@ -12,6 +12,7 @@ from gevent.pywsgi import WSGIServer
 from timeit import default_timer as timer
 from server.app import create_app
 import server.group_setup as group_setup
+import server.bbsae_setup as bbsae_setup
 
 app = create_app()
 
@@ -64,6 +65,7 @@ def main(port: int = conf.data['apiPort']) -> object:
     signal.signal(signal.SIGINT, sigInt_handler)
 
     group_setup.setup()
+    bbsae_setup.setup()
 
     # log.info("initializing validation process...")
     # validationHeaderProcess = Validator()
