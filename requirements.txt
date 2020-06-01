@@ -9,3 +9,4 @@ gevent==1.3.7
 python-gitlab==1.15.0
 gitpython==2.1.15
 furl==2.0.0
+schedule==0.6.0

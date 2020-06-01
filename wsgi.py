@@ -13,6 +13,7 @@ from timeit import default_timer as timer
 from server.app import create_app
 import server.group_setup as group_setup
 import server.bbsae_setup as bbsae_setup
+import server.schedule.schedule as schedule
 
 app = create_app()
 
@@ -63,6 +64,8 @@ def main(port: int = conf.data['apiPort']) -> object:
 
     log.info("adding signal catcher")
     signal.signal(signal.SIGINT, sigInt_handler)
+
+    schedule.start()
 
     group_setup.setup()
     bbsae_setup.setup()
