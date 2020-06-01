@@ -50,7 +50,7 @@ def job():
         log.info("%s %d" % (payload['name'], r.status_code))
 
 def sched():
-    schedule.every().day.at("6:00").do(job)
+    schedule.every(1).day.at("6:00").do(job)
     #schedule.every(10).seconds.do(job)
     while True:
         schedule.run_pending()
