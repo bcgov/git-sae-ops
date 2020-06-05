@@ -28,7 +28,7 @@ def setup():
 
     tok = glapi.create_personal_access_token(user, 'tekton-pat')
     if tok is not None:
-        with open ("%s.token" % 'tekton-pat', 'w') as outfile:
+        with open ("/tokens/%s.token" % 'tekton-pat', 'w') as outfile:
             outfile.write(tok)
 
     #pipeline_url = conf.get('bbsae').get('pipeline_url')
