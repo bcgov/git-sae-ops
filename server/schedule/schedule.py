@@ -28,7 +28,10 @@ def job():
             'name': project.path,
             'namespace': project.namespace['path'],
             'default_branch': project.default_branch,
-            'shared_with_groups_count': len(project.shared_with_groups)
+            'created_at': project.created_at,
+            'last_activity_at': project.last_activity_at,
+            'shared_with_groups_count': len(project.shared_with_groups),
+            'statistics' : project.statistics
         }
         headers = {
             "Content-Type": "application/json"
@@ -39,6 +42,7 @@ def job():
     # <class 'gitlab.v4.objects.Group'> => {'id': 5, 'web_url': 'https://projectscstg.popdata.bc.ca/groups/99-t05', 'name': '99-t05', 'path': '99-t05', 'description': '', 'visibility': 'private', 'share_with_group_lock': False, 'require_two_factor_authentication': False, 'two_factor_grace_period': 48, 'project_creation_level':'developer', 'auto_devops_enabled': None, 'subgroup_creation_level': 'owner', 'emails_disabled': None, 'mentions_disabled': None, 'lfs_enabled': True, 'default_branch_protection': 2, 'avatar_url': None, 'request_access_enabled': False, 'full_name': '99-t05', 'full_path': '99-t05', 'parent_id': None}
     groups = glapi.get_all_groups()
     for group in groups:
+        #group = glapi.get_group_by_id (group_item.id)
         payload = {
             'group_id': group.id,
             'name': group.path

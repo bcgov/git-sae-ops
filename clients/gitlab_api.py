@@ -22,7 +22,11 @@ class GitlabAPI():
 
     def get_all_projects(self):
         log.info('{0:30}'.format('get_all_projects'))
-        return self.gl.projects.list(all=True, retry_transient_errors=True)
+        return self.gl.projects.list(all=True, statistics=True, retry_transient_errors=True)
+
+    def get_group_by_id(self, aGroup):
+        log.info('{0:30} {1}'.format('get_group_by_id', aGroup))
+        return self.gl.groups.get(aGroup, with_projects=False)
 
     def get_group(self, aGroup):
         log.info('{0:30} {1}'.format('get_group', aGroup))
