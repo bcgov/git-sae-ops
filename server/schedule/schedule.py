@@ -21,6 +21,8 @@ def job():
 
     glapi = GitlabAPI(projectsc_host, projectsc_token)
 
+    total_commits = 0
+
     projects = glapi.get_all_projects()
     for project in projects:
         payload = {
@@ -33,11 +35,20 @@ def job():
             'shared_with_groups_count': len(project.shared_with_groups),
             'statistics' : project.statistics
         }
+        if project.namespace['name'] == 'shares':
+            total_commits = total_commits + project.statistics['commit_count']
+
         headers = {
             "Content-Type": "application/json"
         }
         r = requests.post("%s/api/v1/record/%s/%s" % (recorder_url, "code_sharing_projects", "projectsc"), data=json.dumps(payload), headers=headers)
         log.info("%s %d" % (payload['name'], r.status_code))
+
+    payload = {
+        'commit_count' : total_commits
+    }
+    r = requests.post("%s/api/v1/record/%s/%s" % (recorder_url, "code_sharing_commits", "projectsc"), data=json.dumps(payload), headers=headers)
+    log.info("commit_count %d" % (r.status_code))
 
     # <class 'gitlab.v4.objects.Group'> => {'id': 5, 'web_url': 'https://projectscstg.popdata.bc.ca/groups/99-t05', 'name': '99-t05', 'path': '99-t05', 'description': '', 'visibility': 'private', 'share_with_group_lock': False, 'require_two_factor_authentication': False, 'two_factor_grace_period': 48, 'project_creation_level':'developer', 'auto_devops_enabled': None, 'subgroup_creation_level': 'owner', 'emails_disabled': None, 'mentions_disabled': None, 'lfs_enabled': True, 'default_branch_protection': 2, 'avatar_url': None, 'request_access_enabled': False, 'full_name': '99-t05', 'full_path': '99-t05', 'parent_id': None}
     groups = glapi.get_all_groups()
