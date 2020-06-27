@@ -441,7 +441,7 @@ class GitlabAPI():
                 log.info('{0:30} Token for {1} ALREADY EXISTS'.format('', user.username))
                 return None
 
-        i_t = user.impersonationtokens.create({'name': name, 'scopes': ['api']})
+        i_t = user.impersonationtokens.create({'name': name, 'scopes': ['api','read_repository']})
         log.info('{0:30} Token CREATED {1}'.format('', str(i_t)))
         return i_t.token
                                          
